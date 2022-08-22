@@ -3,7 +3,7 @@ import numpy as np
 
 
 # Carregando imagem
-image_path = 'ceca-uel.jpg'
+image_path = 'example-image.jpg'
 img = cv2.imread(image_path, cv2.IMREAD_COLOR) # constante para definir como RGB
 
 # Printar imagem de input
