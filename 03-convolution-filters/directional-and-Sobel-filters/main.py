@@ -68,6 +68,8 @@ def convolution():
     start = math.floor(neighbor/2)
     result_image = np.zeros(img.shape)
     stacked_imgs = img
+
+    print("Processing...")
     
     for k in range(len(options)): 
         mask_name = relation[options[k]]
@@ -92,6 +94,7 @@ def convolution():
         # cv.imwrite(f"{mask_name}_final_result.jpg", result_image)
     
     cv.imwrite(f"all_stacked_images.jpg", stacked_imgs)
+    print("Finish!")
 
 
 # Calling function

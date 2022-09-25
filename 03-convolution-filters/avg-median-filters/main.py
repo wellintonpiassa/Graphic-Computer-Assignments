@@ -20,6 +20,8 @@ def convolution(filter_function):
     start = math.floor(neighbor/2)
     result_image = np.zeros(img.shape)
 
+    print("Processing")
+
     for i in range(start, img_width - start):
         for j in range(start, img_height - start):
             red_frame = img[i-start:i+start+1, j-start:j+start+1, 2]
@@ -38,6 +40,7 @@ def convolution(filter_function):
     stacked_imgs = np.hstack((img,result_image))
     cv.imwrite(f"{filter_function.__name__}_final_result.jpg", result_image)
     cv.imwrite(f"{filter_function.__name__}_stacked_images.jpg", stacked_imgs)
+    print("Finish!")
 
 def avg_filter(frame):
     # somando media do frame
