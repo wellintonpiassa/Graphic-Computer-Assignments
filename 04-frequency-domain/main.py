@@ -3,39 +3,35 @@ import numpy as np
 import math
 
 # import image
-# img = cv.imread('example-image.jpg', cv.IMREAD_COLOR)
+input_img = cv.imread('example_image_50x50.jpg', 0)
+# input_img = cv.imread('example_image_128x128.jpg', 0)
+# input_img = cv.imread('example_image_512x512.jpg', 0)
 
-img = cv.imread('example_image_50x50.jpg')
-#img = cv.imread('example_image_128x128.jpg')
-# img = cv.imread('example_image_512x512.jpg')
+# getting image sizes
+n = input_img.shape[0]
+m = input_img.shape[1]
 
-img_width = img.shape[0]
-img_height = img.shape[1]
 
-# getting RGB channels individually
-# red_channel = img[:,:,2]
-# green_channel = img[:,:,1]
-# blue_channel = img[:,:,0]
 
 def cossenoDCT(x, i, N):
     return (math.cos(((2.0*x+1)*i*math.pi)/(2*N)))
 
 
-def alfa(x, a1, a2):
+def alfa(x, N):
     if x == 0:
-        return a1
+        return 1.0/math.sqrt(N)
     else:
-        return a2
+        return math.sqrt(2.0/N)
 
 
-def dct():
+def dct(img):
     print("Creating DCT...")
-    output_image = np.zeros(img.shape)
-    n = img_width
-    m = img_height
-    alfa1 = 1.0/math.sqrt(n)
-    alfa2 = math.sqrt(2.0/n)
+    
+    frequency_domain_image = np.zeros((n,m))
 
+    # normalyzing image
+    img = img/255
+    
     for u in range(n):
         for v in range(m):
             soma = 0
@@ -45,15 +41,65 @@ def dct():
                 for y in range(m):
                     soma += img[x][y] * cossenoDCT(x,u,n) * cossenoDCT(y,v,m)
 
-            aux = alfa(u, alfa1, alfa2) * alfa(v, alfa1, alfa2) * soma
-            output_image[u][v] = aux
+            frequency_domain_image[u][v] = alfa(u, n) * alfa(v, m) * soma
 
-    cv.imwrite(f"output_image_{img_width}x{img_height}.jpg", output_image)
     print("Finish DCT!")
+    return (frequency_domain_image * 255)
     
     
+def inverseDCT(frequency_domain_image):
+    print("Creating Inverse DCT...")
 
-def inverseDCT():
-    pass
+    frequency_domain_image = frequency_domain_image / 255
+    inverse_image = np.zeros((n,m))
 
-dct()
+    for x in range(n):
+        for y in range(m):
+            soma = 0
+
+            # calculating the sum 
+            for u in range(n):
+                for v in range(m):
+                    soma += alfa(u, n) * alfa(v, m) * frequency_domain_image[u][v] * cossenoDCT(x,u,n) * cossenoDCT(y,v,m)
+
+            inverse_image[x][y] = soma
+    
+    print("Finish Inverse DCT!")
+    return (inverse_image * 255)
+
+
+def low_pass_filter(frequency_domain_image, d0):
+    low_pass_filter_image = np.zeros_like(frequency_domain_image)
+
+    for u in range(0, d0+1):
+        for v in range(0, d0+1):
+            if math.dist([0, 0], [u, v]) <= d0:
+                low_pass_filter_image[u, v] = frequency_domain_image[u, v]
+
+    return low_pass_filter_image
+
+
+def high_pass_filter(frequency_domain_image, d0):
+    high_pass_filter_image = np.zeros_like(frequency_domain_image)
+
+    for u in range(0, d0+1):
+        for v in range(0, d0+1):
+            if math.dist([0, 0], [u, v]) > d0:
+                high_pass_filter_image[u, v] = frequency_domain_image[u, v]
+
+    return high_pass_filter_image
+
+
+
+# Calling functions
+frequency_domain_image = dct(input_img)
+inverse_image = inverseDCT(frequency_domain_image)
+low_pass_filter_image = low_pass_filter(frequency_domain_image, 10)
+high_pass_filter_image = high_pass_filter(frequency_domain_image, 10)
+
+
+# Outputs images
+cv.imwrite(f"frequency_domain_image_{n}x{m}.jpg", frequency_domain_image)
+cv.imwrite(f"inverse_image_{n}x{m}.jpg", inverse_image)
+cv.imwrite(f"low_pass_filter_image_{n}x{m}.jpg", low_pass_filter_image)
+cv.imwrite(f"high_pass_filter_image_{n}x{m}.jpg", high_pass_filter_image)
