@@ -37,7 +37,7 @@ def mount_structuring_element(structure_index):
 
     if structure_index == 1: # line structure
         structure = np.zeros(neighbor_number)
-        for i in range(center - 1, neighbor_number):
+        for i in range(center, neighbor_number):
             structure[i] = 1
 
     elif structure_index == 2: # box structure
@@ -61,10 +61,17 @@ def mount_structuring_element(structure_index):
 
 # Checking if apply dilatation
 def apply_dilatation(frame, structure):
-    for i in range(len(frame)):
-        for j in range(len(frame)):
-            if structure[i][j] == 1 and frame[i][j] == 255:
-                return 255
+    
+    if structure.ndim == 1: # 1 dimensional array (line structure)
+        for i in range(len(frame)):
+            for j in range(len(frame)):
+                if structure[i] == 1 and frame[i][j] == 255:
+                    return 255
+    else:   # 2 dimensional array (all other structures)
+        for i in range(len(frame)):
+            for j in range(len(frame)):
+                if structure[i][j] == 1 and frame[i][j] == 255:
+                    return 255
     return 0
 
 # scroll through the image
@@ -76,8 +83,8 @@ def convolution():
     print("Processing...")
     
     for k in range(len(options)):
-        structuring_element = mount_structuring_element(options[k])      
-
+        structuring_element = mount_structuring_element(options[k])
+        
         for i in range(start, img_width - start):
             for j in range(start, img_height - start):
                 frame = img[i-start:i+start+1, j-start:j+start+1]
