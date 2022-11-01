@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # import image
-img = cv.imread('example-image.jpg', 0)
+img = cv.imread('example-rectangle.png', 0)
 img_width = img.shape[0]
 img_height = img.shape[1]
 
@@ -21,7 +21,6 @@ for i in range(len(options)):
         print("Invalid option")
         exit()
 
-
 # Receiving a neighbor value
 print("Insert neighbor value")
 neighbor_number = int(input("input: "))
@@ -31,7 +30,6 @@ center = math.floor(neighbor_number / 2)
 if((neighbor_number <= 1) or (neighbor_number % 2 == 0)):
     print("Invalid neighbor value (valids: 3, 5, 7, 9, 11, ...)")
     exit()
-
 
 # Mounting structuring element
 def mount_structuring_element(structure_index):
@@ -43,7 +41,7 @@ def mount_structuring_element(structure_index):
             structure[i] = 1
 
     elif structure_index == 2: # box structure
-        structure = structure.fill(1)
+        structure = np.full((neighbor_number, neighbor_number), 1, dtype=np.int16)
 
     elif structure_index == 3: # Disc structure
         radius = center
@@ -61,11 +59,15 @@ def mount_structuring_element(structure_index):
 
     return structure
 
-
+# Checking if apply dilatation
 def apply_dilatation(frame, structure):
-    pass
+    for i in range(len(frame)):
+        for j in range(len(frame)):
+            if structure[i][j] == 1 and frame[i][j] == 255:
+                return 255
+    return 0
 
-
+# scroll through the image
 def convolution():
     start = center
     result_image = np.zeros(img.shape)
@@ -74,16 +76,16 @@ def convolution():
     print("Processing...")
     
     for k in range(len(options)):
-        structuring_element = mount_structuring_element(options[k])
+        structuring_element = mount_structuring_element(options[k])      
 
         for i in range(start, img_width - start):
             for j in range(start, img_height - start):
                 frame = img[i-start:i+start+1, j-start:j+start+1]
                 result_image[i][j] = apply_dilatation(frame, structuring_element)
-
-        
+                
         stacked_imgs = np.hstack((stacked_imgs, result_image))
-        # cv.imwrite(f"{mask_name}_final_result.jpg", result_image)
     
     cv.imwrite(f"all_stacked_images.jpg", stacked_imgs)
     print("Finish!")
+
+convolution()
