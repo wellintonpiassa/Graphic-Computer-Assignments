@@ -3,9 +3,11 @@ import numpy as np
 import math
 
 # import image
-img = cv.imread('example-rectangle.png', 0)
+img_name = 'example-rectangle'
+img = cv.imread(f'{img_name}.png', 0)
 img_width = img.shape[0]
 img_height = img.shape[1]
+
 
 # Receiving structure elements
 print("Insert structuring elements")
@@ -14,6 +16,7 @@ print("Ps. Enter the options separated by space")
 options = input("input: ")
 options = options.split(" ")
 
+
 # Checking if options is valid
 for i in range(len(options)):
     options[i] = int(options[i])
@@ -21,15 +24,18 @@ for i in range(len(options)):
         print("Invalid option")
         exit()
 
+
 # Receiving a neighbor value
 print("Insert neighbor value")
 neighbor_number = int(input("input: "))
 center = math.floor(neighbor_number / 2)
 
+
 # Checking if neighbor value is valid
 if((neighbor_number <= 1) or (neighbor_number % 2 == 0)):
     print("Invalid neighbor value (valids: 3, 5, 7, 9, 11, ...)")
     exit()
+
 
 # Mounting structuring element
 def mount_structuring_element(structure_index):
@@ -56,12 +62,11 @@ def mount_structuring_element(structure_index):
             for j in range(len(structure[1])):
                 if(i == center or j == center):
                     structure[i][j] = 1
-
     return structure
 
+
 # Checking if apply dilatation
-def apply_dilatation(frame, structure):
-    
+def apply_dilatation(frame, structure):    
     if structure.ndim == 1: # 1 dimensional array (line structure)
         for i in range(len(frame)):
             for j in range(len(frame)):
@@ -73,6 +78,7 @@ def apply_dilatation(frame, structure):
                 if structure[i][j] == 1 and frame[i][j] == 255:
                     return 255
     return 0
+
 
 # scroll through the image
 def convolution():
@@ -92,7 +98,7 @@ def convolution():
                 
         stacked_imgs = np.hstack((stacked_imgs, result_image))
     
-    cv.imwrite(f"all_stacked_images.jpg", stacked_imgs)
+    cv.imwrite(f"dilatation_{img_name}{options}.jpg", stacked_imgs)
     print("Finish!")
 
 convolution()
